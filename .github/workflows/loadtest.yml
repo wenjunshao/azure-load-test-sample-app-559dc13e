@@ -11,6 +11,7 @@ env:
   RESOURCE_GROUP: az2006-rg
   LOAD_TEST_RESOURCE: az2006loadtest
   AZURE_WEBAPP_NAME: az2006app26219
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
 
 jobs:
   loadtest:
@@ -27,8 +28,8 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Azure Load Testing
-        # Pin to the official Node 24 compatibility update.
-        uses: azure/load-testing@ce6fe8a43177293d8f288123dc628038d2849bbb
+        # Pinning the action to a specific commit SHA to avoid breaking changes.
+        uses: azure/load-testing@5c5d948af73990aa1c0732e255897d1b1b4c0e7b # v1.2.5
         with:
           loadTestConfigFile: 'config.yaml'
           loadTestResource: ${{ env.LOAD_TEST_RESOURCE }}
