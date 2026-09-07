@@ -1,45 +1,24 @@
+name: Load test
 
+on: [workflow_dispatch]
 
+permissions:
+  id-token: write # Require write permission to fetch an OIDC token.
+  contents: read # Required for actions/checkout.
+
+env:
+  # Enter only the Azure web app name, not its full URL.
+  RESOURCE_GROUP: az2006-rg
+  LOAD_TEST_RESOURCE: az2006loadtest
+  AZURE_WEBAPP_NAME: az2006app26219
 
 jobs:
-  # This workflow consists of a single job called "loadtest"
-
-
-
-
-
-
-
-
   loadtest:
-
-
-
-
-
-
-
-
     runs-on: ubuntu-latest
-
-
-
-
-
-
-
 
     steps:
       - uses: actions/checkout@v4
 
-
-
-
-
-
-
-
-      #Login in your azure subscription using OpenID Connect (credentials stored as GitHub secrets in repo)
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -47,54 +26,23 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-
-
-
-
-
-
-
-      # Run the load test
       - name: Azure Load Testing
-        # Pinning the action to a specific commit SHA to avoid breaking changes in the future.
-        uses: azure/load-testing@ce6fe8a43177293d8f288123dc628038d2849bbb # Node 24-compatible commit
+        # Pin to the official Node 24 compatibility update.
+        uses: azure/load-testing@ce6fe8a43177293d8f288123dc628038d2849bbb
         with:
           loadTestConfigFile: 'config.yaml'
-          loadTestResource: ${{ env.LOAD_TEST_RESOURCE}}
+          loadTestResource: ${{ env.LOAD_TEST_RESOURCE }}
           resourceGroup: ${{ env.RESOURCE_GROUP }}
           env: |
             [
               {
-              "name": "webapp",
-              "value": "${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+                "name": "webapp",
+                "value": "${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
               }
             ]
 
-
-
-
-
-
-
-
-      # upload the published website code artifacts
-      - name: Upload artifact for deployment job
+      - name: Upload load test results
         uses: actions/upload-artifact@v4
         with:
           name: loadTestResults
-          path: ${{github.workspace}}/loadTest
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+          path: ${{ github.workspace }}/loadTest
